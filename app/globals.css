@@ -215,18 +215,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 .cover-layout {
-  display: grid;
+  display: flex;
   min-height: 100%;
-  grid-template-rows: minmax(295px, 47%) minmax(360px, 1fr);
+  flex-direction: column;
 }
 
 .portrait-stage {
   position: relative;
   display: grid;
-  min-height: 0;
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 686 / 740;
   place-items: center;
   overflow: hidden;
+  padding: 0;
+  border: 0;
   background: linear-gradient(180deg, #fffdf9, #fff7f7 72%, rgba(248, 224, 230, 0.65));
+  cursor: pointer;
+  appearance: none;
 }
 
 .portrait-stage::after {
@@ -256,8 +262,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   position: relative;
   z-index: 2;
   display: block;
-  width: min(94%, 410px);
-  height: 96%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
   filter: drop-shadow(0 14px 14px rgba(100, 62, 73, 0.12));
@@ -302,6 +308,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   padding: 25px 35px 30px;
   text-align: center;
   background: rgba(255, 250, 246, 0.98);
+}
+
+.cover-copy > * {
+  animation: copy-reveal 620ms cubic-bezier(0.16, 0.83, 0.29, 1) both;
+}
+.cover-copy > *:nth-child(1) { animation-delay: 90ms; }
+.cover-copy > *:nth-child(2) { animation-delay: 150ms; }
+.cover-copy > *:nth-child(3) { animation-delay: 210ms; }
+.cover-copy > *:nth-child(4) { animation-delay: 270ms; }
+.cover-copy > *:nth-child(5) { animation-delay: 330ms; }
+.cover-copy > *:nth-child(6) { animation-delay: 390ms; }
+.cover-copy > *:nth-child(7) { animation-delay: 450ms; }
+.cover-copy > *:nth-child(8) { animation-delay: 510ms; }
+
+@keyframes copy-reveal {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .eyebrow {
@@ -726,7 +749,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 @media (max-height: 740px) {
   .invitation { grid-template-rows: 54px minmax(0, 1fr) 58px; }
-  .cover-layout { grid-template-rows: minmax(235px, 43%) minmax(335px, 1fr); }
   .cover-copy { padding-top: 18px; }
   .details-copy { padding-top: 26px; }
   .details-copy h2 { font-size: 2.85rem; }

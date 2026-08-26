@@ -186,14 +186,22 @@ export default function Home() {
           <article key={screen} className={`screen screen-${screen + 1} enter-${direction}`}>
             {screen === 0 && (
               <div className={`cover-layout ${opened ? 'cover-opened' : ''}`}>
-                <div className="portrait-stage">
+                <button
+                  type="button"
+                  className="portrait-stage"
+                  onClick={() => {
+                    if (!opened) setOpened(true);
+                    celebrate();
+                  }}
+                  aria-label="Abrir la invitación tocando la gatita"
+                >
                   <div className="portrait-halo" aria-hidden="true" />
                   <img
                     className="kitty-portrait"
                     src="/gatita-lazo.png"
                     alt="Gatita blanca con moño rosa y una biblia"
                   />
-                </div>
+                </button>
 
                 <div className="cover-copy">
                   <span className="eyebrow">{opened ? 'Invitación abierta' : 'Una invitación muy especial'}</span>
