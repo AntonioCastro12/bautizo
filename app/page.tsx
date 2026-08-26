@@ -111,39 +111,23 @@ export default function Home() {
     event.currentTarget.style.setProperty('--tilt-y', '0deg');
   };
 
-  const shareInvitation = async () => {
+  const shareInvitation = () => {
     const shareData = {
       title: 'Bautizo de Valentina',
       text: 'Acompáñanos a celebrar el bautizo de Valentina.',
       url: window.location.href,
     };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
-      await navigator.clipboard.writeText(window.location.href);
-      setNotice('Enlace copiado para compartir');
-    } catch {
-      setNotice('Puedes copiar el enlace desde tu navegador');
-    }
+    const message = `${shareData.text}\n${shareData.url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    setNotice('Invitación preparada para enviar por WhatsApp');
   };
 
   const sendWish = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const message = `${wishName || 'Un invitado'}: ${wishMessage || 'Que Dios bendiga siempre a Valentina.'}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Un deseo para Valentina', text: message });
-        setNotice('¡Gracias por tu lindo deseo!');
-      } else {
-        await navigator.clipboard.writeText(message);
-        setNotice('Deseo copiado para enviarlo a la familia');
-      }
-    } catch {
-      setNotice('Tu deseo está listo para compartir');
-    }
+    const whatsappMessage = `Un deseo para Valentina ♡\n${message}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, '_blank', 'noopener,noreferrer');
+    setNotice('Tu deseo está listo en WhatsApp');
     setWishOpen(false);
     celebrate();
   };
@@ -182,7 +166,6 @@ export default function Home() {
           touchStart.current = null;
         }}
       >
-        <div className="card-glow" aria-hidden="true" />
         <header className="progress-bar">
           <p>{screens[screen].label}</p>
           <div className="dots" aria-label={`Pantalla ${screen + 1} de ${screens.length}`}>
@@ -210,9 +193,6 @@ export default function Home() {
                     src="/gatita-lazo.png"
                     alt="Gatita blanca con moño rosa y una biblia"
                   />
-                  <span className="floating-heart heart-one" aria-hidden="true">♡</span>
-                  <span className="floating-heart heart-two" aria-hidden="true">✦</span>
-                  <span className="floating-heart heart-three" aria-hidden="true">♡</span>
                 </div>
 
                 <div className="cover-copy">
@@ -304,7 +284,7 @@ export default function Home() {
                   <span>Tu presencia es nuestro mejor regalo</span>
                   <div className="action-row">
                     <button className="primary-button" onClick={() => setWishOpen(true)}>Dejar un deseo</button>
-                    <button className="round-share" onClick={shareInvitation} aria-label="Compartir invitación">↗</button>
+                    <button className="whatsapp-share" onClick={shareInvitation} aria-label="Compartir invitación por WhatsApp">WhatsApp</button>
                   </div>
                   {notice && <p role="status">{notice}</p>}
                 </div>
@@ -328,7 +308,7 @@ export default function Home() {
             <button className="modal-close" onClick={() => setWishOpen(false)} aria-label="Cerrar">×</button>
             <span aria-hidden="true" className="modal-heart">♡</span>
             <h2 id="wish-title">Un deseo para Valentina</h2>
-            <p>Escribe unas palabras bonitas para acompañarla en este día.</p>
+            <p>Escribe unas palabras bonitas y las prepararemos para enviarlas por WhatsApp.</p>
             <form onSubmit={sendWish}>
               <label>
                 Tu nombre
@@ -338,7 +318,7 @@ export default function Home() {
                 Tu mensaje
                 <textarea value={wishMessage} onChange={(event) => setWishMessage(event.target.value)} placeholder="Que Dios te bendiga siempre…" rows={3} />
               </label>
-              <button className="primary-button" type="submit">Compartir mi deseo</button>
+              <button className="primary-button whatsapp-button" type="submit">Enviar por WhatsApp</button>
             </form>
           </div>
         </div>

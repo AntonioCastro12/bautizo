@@ -144,16 +144,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   transition: transform 180ms ease-out, box-shadow 300ms ease;
 }
 
-.card-glow {
-  position: absolute;
-  z-index: 20;
-  inset: 0;
-  opacity: 0.33;
-  pointer-events: none;
-  background: radial-gradient(circle at var(--glow-x) var(--glow-y), rgba(255, 255, 255, 0.9), transparent 28%);
-  mix-blend-mode: soft-light;
-}
-
 .progress-bar, .navigation {
   position: relative;
   z-index: 30;
@@ -312,19 +302,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   padding: 25px 35px 30px;
   text-align: center;
   background: rgba(255, 250, 246, 0.98);
-}
-
-.cover-copy::before {
-  content: '';
-  position: absolute;
-  top: -16px;
-  left: 50%;
-  width: 85px;
-  height: 32px;
-  border: 1px solid rgba(184, 149, 79, 0.26);
-  border-radius: 50%;
-  background: var(--paper);
-  transform: translateX(-50%);
 }
 
 .eyebrow {
@@ -645,20 +622,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .rsvp-card > span { margin-bottom: 11px; color: #745f65; font-size: 0.52rem; line-height: 1.45; }
 .action-row { display: flex; align-items: center; gap: 8px; }
 .rsvp-card .primary-button { min-height: 40px; padding: 0 16px; font-size: 0.58rem; }
-.round-share {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
+.whatsapp-share {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
   border: 1px solid rgba(147, 62, 93, 0.35);
-  border-radius: 50%;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--rose-dark);
   cursor: pointer;
-  font-size: 1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.57rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   transition: transform 200ms ease, background 200ms ease;
 }
-.round-share:hover { background: white; transform: rotate(8deg) scale(1.06); }
+.whatsapp-share:hover { background: white; transform: translateY(-2px) scale(1.03); }
+.whatsapp-button { background: linear-gradient(135deg, #187b4b, #25a867); box-shadow: 0 10px 25px rgba(24, 123, 75, 0.24); }
 .rsvp-card p { margin: 9px 0 0; color: var(--sage); font-family: Arial, Helvetica, sans-serif; font-size: 0.64rem; font-weight: 700; }
 
 .navigation {
