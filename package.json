@@ -16,6 +16,12 @@
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
+  "scripts": {
+  "dev": "vinext dev",
+  "build": "vinext build",
+  "build:netlify": "next build",
+  "start": "vinext start"
+}
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
     "@cloudflare/workers-types": "4.20260515.1",
