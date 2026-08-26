@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://bautizo-valentina-2026.antoniojcc735429.chatgpt.site'),
   title: 'Bautizo de Valentina',
   description: 'Una invitación especial para acompañarnos a celebrar el bautizo de Valentina.',
   openGraph: {
@@ -16,6 +17,9 @@ export const metadata: Metadata = {
     title: 'Bautizo de Valentina',
     description: '14 de noviembre de 2026 · 11:00 a. m.',
     images: ['/og.png'],
+  },
+  alternates: {
+    canonical: '/',
   },
 };
 
