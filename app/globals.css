@@ -86,51 +86,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   50% { opacity: 0.9; transform: translateY(-12px) rotate(9deg) scale(1.16); }
 }
 
-.walking-intro {
-  position: fixed;
-  z-index: 30;
-  display: grid;
-  inset: 0;
-  width: 100vw;
-  min-height: 100svh;
-  height: 100dvh;
-  place-items: center;
-  padding: 0;
-  overflow: hidden;
-  background: linear-gradient(180deg, #fffdf8 0%, #fff3f4 100%);
-  animation: cover-backdrop-in 500ms ease both;
-}
-
-.walking-intro video {
-  display: block;
-  width: 100vw;
-  min-height: 100svh;
-  height: 100dvh;
-  max-height: none;
-  object-fit: cover;
-  object-position: 50% 50%;
-}
-
-.walking-intro.is-ending {
-  pointer-events: none;
-  animation: intro-zoom-out 950ms cubic-bezier(0.16, 0.76, 0.2, 1) forwards;
-}
-
-.walking-intro.is-ending video {
-  animation: intro-video-zoom 950ms cubic-bezier(0.16, 0.76, 0.2, 1) forwards;
-}
-
-@keyframes intro-zoom-out {
-  0% { opacity: 1; }
-  55% { opacity: 0.72; }
-  100% { opacity: 0; }
-}
-
-@keyframes intro-video-zoom {
-  from { filter: blur(0); transform: scale(1); }
-  to { filter: blur(4px); transform: scale(1.14); }
-}
-
 .cover-overlay {
   position: fixed;
   z-index: 20;
@@ -376,6 +331,43 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     radial-gradient(circle at 82% 18%, rgba(201, 109, 135, 0.16) 0 2px, transparent 3px),
     linear-gradient(180deg, #fffefa 0%, #fff8f6 72%, #f8eee8 100%);
   background-size: 53px 53px, 67px 67px, auto;
+}
+
+.opening-cat-overlay {
+  position: absolute;
+  z-index: 5;
+  top: 45svh;
+  right: 0;
+  left: 0;
+  height: min(48svh, 420px);
+  overflow: hidden;
+  pointer-events: none;
+  animation: opening-cat-layer 6.6s linear forwards;
+}
+
+.opening-cat-runner {
+  position: absolute;
+  top: -8%;
+  left: 50%;
+  display: block;
+  animation: opening-cat-travel 6.6s ease-in-out forwards;
+}
+
+.opening-cat-overlay video {
+  display: block;
+  height: min(46svh, 400px);
+  width: auto;
+}
+
+@keyframes opening-cat-layer {
+  0%, 78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes opening-cat-travel {
+  0% { transform: translateX(-105%) scale(0.94); }
+  72% { transform: translateX(-52%) scale(1); }
+  100% { transform: translateX(-12%) scale(0.96); }
 }
 
 .cat-walkway::after {

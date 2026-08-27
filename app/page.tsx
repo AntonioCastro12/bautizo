@@ -32,9 +32,8 @@ function getCountdown() {
 }
 
 export default function Home() {
-  const [showIntro, setShowIntro] = useState(true);
-  const [introEnding, setIntroEnding] = useState(false);
   const [coverStage, setCoverStage] = useState<'closed' | 'opening' | 'open'>('closed');
+  const [showOpeningCat, setShowOpeningCat] = useState(true);
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   const [wishName, setWishName] = useState('');
   const [wishMessage, setWishMessage] = useState('');
@@ -114,26 +113,6 @@ export default function Home() {
         ))}
       </div>
 
-      {showIntro && (
-        <div
-          className={`walking-intro ${introEnding ? 'is-ending' : ''}`}
-          aria-label="Entrada animada de la invitación"
-          onAnimationEnd={() => {
-            if (introEnding) setShowIntro(false);
-          }}
-        >
-          <video
-            src="/entrada-bautizo.mp4"
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            onEnded={() => setIntroEnding(true)}
-            onError={() => setShowIntro(false)}
-          />
-        </div>
-      )}
-
       {coverStage !== 'open' && (
         <div className={`cover-overlay ${coverStage === 'opening' ? 'cover-opening' : ''}`}>
           <button
@@ -185,6 +164,25 @@ export default function Home() {
               />
             </div>
           </div>
+
+          {showOpeningCat && (
+            <div
+              className="opening-cat-overlay"
+              aria-hidden="true"
+              onAnimationEnd={() => setShowOpeningCat(false)}
+            >
+              <span className="opening-cat-runner">
+                <video
+                  src="/gatita-picsart.webm"
+                  autoPlay
+                  muted
+                  playsInline
+                  preload="auto"
+                  onEnded={() => setShowOpeningCat(false)}
+                />
+              </span>
+            </div>
+          )}
 
           <div className="hero-copy">
             <span className="eyebrow">Con mucha alegría</span>
