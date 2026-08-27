@@ -319,30 +319,64 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .cat-walkway {
   position: relative;
+  display: grid;
   width: 100%;
   min-height: 48svh;
+  place-items: end center;
   overflow: hidden;
-  background: #fdfaf2;
+  background:
+    radial-gradient(circle at 15% 24%, rgba(229, 197, 118, 0.22) 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 18%, rgba(201, 109, 135, 0.16) 0 2px, transparent 3px),
+    linear-gradient(180deg, #fffefa 0%, #fff8f6 72%, #f8eee8 100%);
+  background-size: 53px 53px, 67px 67px, auto;
+}
+
+.cat-walkway::after {
+  position: absolute;
+  right: -12%;
+  bottom: -25px;
+  left: -12%;
+  height: 74px;
+  border-radius: 50% 50% 0 0;
+  background: rgba(221, 195, 176, 0.18);
+  content: '';
+  filter: blur(2px);
 }
 
 .cat-arrival {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 2;
   width: 100%;
-  animation: walk-across 3.45s cubic-bezier(0.17, 0.78, 0.23, 1) both;
+  height: 100%;
+  margin: 0;
+  animation: video-reveal 850ms ease both;
 }
 
 .walking-kitty {
   display: block;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  max-height: none;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: #d28b98;
+  object-fit: cover;
   object-position: center;
   user-select: none;
-  filter: drop-shadow(0 14px 13px rgba(102, 61, 74, 0.13));
-  animation:
-    step-bob 0.49s ease-in-out 0s 7,
-    settle-float 4s ease-in-out 3.45s infinite;
+  mix-blend-mode: multiply;
+  filter: contrast(1.06) saturate(0.94) brightness(1.04) drop-shadow(0 14px 13px rgba(102, 61, 74, 0.13));
+  animation: video-breathe 4s ease-in-out infinite;
+}
+
+@keyframes video-reveal {
+  from { opacity: 0; transform: scale(1.035); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes video-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.012); }
 }
 
 @keyframes walk-across {
@@ -368,7 +402,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   right: 10%;
   bottom: 5%;
   left: 7%;
-  display: flex;
+  display: none;
   justify-content: space-between;
   pointer-events: none;
 }

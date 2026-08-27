@@ -156,10 +156,15 @@ export default function Home() {
               {Array.from({ length: 6 }).map((_, index) => <i key={index} />)}
             </div>
             <div className="cat-arrival">
-              <img
+              <video
                 className="walking-kitty"
-                src="/gatita-lazo.png"
-                alt="Gatita blanca completa con moño rosa y una biblia"
+                src="/gatita-caminando.mp4"
+                aria-label="Gatita blanca con moño rosa entrando caminando"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
               />
             </div>
           </div>
