@@ -22,6 +22,30 @@ const places = [
   },
 ];
 
+const godparents = [
+  {
+    icon: "🤍",
+    role: "Padrinos de bautizo",
+    name: "Juan Pérez & María López"
+  },
+  {
+    icon: "✨",
+    role: "Padrinos de vela",
+    name: "Carlos & Fernanda"
+  }
+];
+const myParents = [
+  {
+    icon: "🤵🏻",
+    role: "Padre",
+    name: "Juan Pérez Lagos"
+  },
+  {
+    icon: "👸🏻",
+    role: "Mamá",
+    name: "Fernanda Juarez"
+  }
+];
 function getCountdown() {
   const difference = Math.max(0, EVENT_DATE - Date.now());
   return {
@@ -241,6 +265,61 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        {/* Sección de padrinos */}
+
+       <section className="places-section reveal-section" aria-labelledby="godparents-title">
+  <span className="eyebrow">Personas especiales</span>
+
+
+<h2 id="godparents-title">Mis padres</h2>
+
+<div className="place-list">
+    {myParents.map((myParents, index) => (
+      <article
+        className="place-card"
+        key={myParents.name}
+        style={{ '--delay': `${index * 120}ms` } as CSSProperties}
+      >
+        <span className="place-icon" aria-hidden="true">
+          {myParents.icon}
+        </span>
+
+        <div>
+          <small>{myParents.role}</small>
+
+          <h3>{myParents.name}</h3>
+
+         
+        </div>
+      </article>
+    ))}
+  </div>
+  
+  <h2 id="godparents-title">Mis padrinos</h2>
+
+  <div className="place-list">
+    {godparents.map((godparent, index) => (
+      <article
+        className="place-card"
+        key={godparent.name}
+        style={{ '--delay': `${index * 120}ms` } as CSSProperties}
+      >
+        <span className="place-icon" aria-hidden="true">
+          {godparent.icon}
+        </span>
+
+        <div>
+          <small>{godparent.role}</small>
+
+          <h3>{godparent.name}</h3>
+
+         
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
 
         <section className="blessing-section reveal-section">
           <span className="cross-mark" aria-hidden="true">✝</span>
