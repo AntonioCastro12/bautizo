@@ -32,6 +32,8 @@ function getCountdown() {
 }
 
 export default function Home() {
+  const [showIntro, setShowIntro] = useState(true);
+  const [introEnding, setIntroEnding] = useState(false);
   const [coverStage, setCoverStage] = useState<'closed' | 'opening' | 'open'>('closed');
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   const [wishName, setWishName] = useState('');
@@ -112,6 +114,26 @@ export default function Home() {
         ))}
       </div>
 
+      {showIntro && (
+        <div
+          className={`walking-intro ${introEnding ? 'is-ending' : ''}`}
+          aria-label="Entrada animada de la invitación"
+          onAnimationEnd={() => {
+            if (introEnding) setShowIntro(false);
+          }}
+        >
+          <video
+            src="/entrada-bautizo.mp4"
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            onEnded={() => setIntroEnding(true)}
+            onError={() => setShowIntro(false)}
+          />
+        </div>
+      )}
+
       {coverStage !== 'open' && (
         <div className={`cover-overlay ${coverStage === 'opening' ? 'cover-opening' : ''}`}>
           <button
@@ -156,15 +178,10 @@ export default function Home() {
               {Array.from({ length: 6 }).map((_, index) => <i key={index} />)}
             </div>
             <div className="cat-arrival">
-              <video
+              <img
                 className="walking-kitty"
-                src="/gatita-caminando.mp4"
-                aria-label="Gatita blanca con moño rosa entrando caminando"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
+                src="/gatita-portada-cruz.png"
+                alt="Gatita blanca con moño rosa, cruz y Biblia"
               />
             </div>
           </div>
