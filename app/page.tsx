@@ -1,35 +1,29 @@
 'use client';
 
 import type { CSSProperties, FormEvent, PointerEvent as ReactPointerEvent } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const screens = [
-  { label: 'Bienvenida' },
-  { label: 'La celebración' },
-  { label: 'Los detalles' },
-];
+const EVENT_DATE = new Date('2026-11-14T11:00:00-06:00').getTime();
 
 const places = [
   {
-    type: 'Ceremonia · 11:00 a. m.',
     icon: '✝',
+    label: 'Ceremonia · 11:00 a. m.',
     name: 'Parroquia Nuestra Señora de la Paz',
     address: 'Av. Principal 123, Col. Centro',
     map: 'https://www.google.com/maps/search/?api=1&query=Parroquia+Nuestra+Señora+de+la+Paz',
   },
   {
-    type: 'Recepción · 1:00 p. m.',
     icon: '♕',
+    label: 'Recepción · 1:00 p. m.',
     name: 'Jardín Las Rosas',
     address: 'Calle del Lago 45, Col. Jardines',
     map: 'https://www.google.com/maps/search/?api=1&query=Jardin+Las+Rosas',
   },
 ];
 
-const sparkleSymbols = ['✦', '·', '♡', '✧', '·', '✦', '·', '♡', '✧', '·', '✦', '·'];
-
 function getCountdown() {
-  const difference = Math.max(0, new Date('2026-11-14T11:00:00-06:00').getTime() - Date.now());
+  const difference = Math.max(0, EVENT_DATE - Date.now());
   return {
     days: Math.floor(difference / 86_400_000),
     hours: Math.floor((difference / 3_600_000) % 24),
@@ -38,42 +32,12 @@ function getCountdown() {
 }
 
 export default function Home() {
-  const [screen, setScreen] = useState(0);
-  const [direction, setDirection] = useState<'next' | 'back'>('next');
-  const [opened, setOpened] = useState(false);
-  const [blessingOpen, setBlessingOpen] = useState(false);
-  const [activePlace, setActivePlace] = useState(0);
-  const [wishOpen, setWishOpen] = useState(false);
+  const [coverStage, setCoverStage] = useState<'closed' | 'opening' | 'open'>('closed');
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   const [wishName, setWishName] = useState('');
   const [wishMessage, setWishMessage] = useState('');
   const [notice, setNotice] = useState('');
-  const [burstKey, setBurstKey] = useState(0);
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
-  const touchStart = useRef<number | null>(null);
-
-  const celebrate = () => setBurstKey(Date.now());
-
-  const goTo = useCallback((next: number) => {
-    if (next < 0 || next >= screens.length) return;
-    setDirection(next > screen ? 'next' : 'back');
-    setScreen(next);
-    setNotice('');
-    if (next === 2) window.setTimeout(celebrate, 280);
-  }, [screen]);
-
-  const advance = useCallback(() => {
-    if (screen === 0 && !opened) {
-      setOpened(true);
-      celebrate();
-      return;
-    }
-    if (screen === 2) {
-      setDirection('back');
-      setScreen(0);
-      return;
-    }
-    goTo(screen + 1);
-  }, [goTo, opened, screen]);
+  const detailsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const updateCountdown = () => setCountdown(getCountdown());
@@ -83,254 +47,215 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (wishOpen && event.key === 'Escape') {
-        setWishOpen(false);
-        return;
-      }
-      if (event.key === 'ArrowRight' || event.key === 'Enter') advance();
-      if (event.key === 'ArrowLeft') goTo(screen - 1);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [advance, goTo, screen, wishOpen]);
+    if (coverStage !== 'open') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      },
+      { threshold: 0.16 },
+    );
+    const sections = document.querySelectorAll('.reveal-section');
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [coverStage]);
 
-  const handleParallax = (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === 'touch') return;
+  const openCover = () => {
+    if (coverStage === 'closed') setCoverStage('opening');
+  };
+
+  const handleCoverTilt = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'touch' || coverStage !== 'closed') return;
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty('--tilt-x', `${(-y * 2.3).toFixed(2)}deg`);
-    event.currentTarget.style.setProperty('--tilt-y', `${(x * 2.3).toFixed(2)}deg`);
-    event.currentTarget.style.setProperty('--glow-x', `${((x + 0.5) * 100).toFixed(0)}%`);
-    event.currentTarget.style.setProperty('--glow-y', `${((y + 0.5) * 100).toFixed(0)}%`);
+    event.currentTarget.style.setProperty('--cover-rx', `${(-y * 5).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty('--cover-ry', `${(x * 5).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty('--cover-glow-x', `${((x + 0.5) * 100).toFixed(0)}%`);
+    event.currentTarget.style.setProperty('--cover-glow-y', `${((y + 0.5) * 100).toFixed(0)}%`);
   };
 
-  const resetParallax = (event: ReactPointerEvent<HTMLElement>) => {
-    event.currentTarget.style.setProperty('--tilt-x', '0deg');
-    event.currentTarget.style.setProperty('--tilt-y', '0deg');
+  const resetCoverTilt = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    event.currentTarget.style.setProperty('--cover-rx', '0deg');
+    event.currentTarget.style.setProperty('--cover-ry', '0deg');
   };
 
   const shareInvitation = () => {
-    const shareData = {
-      title: 'Bautizo de Valentina',
-      text: 'Acompáñanos a celebrar el bautizo de Valentina.',
-      url: window.location.href,
-    };
-    const message = `${shareData.text}\n${shareData.url}`;
+    const message = `Acompáñanos a celebrar el bautizo de Valentina.\n${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
-    setNotice('Invitación preparada para enviar por WhatsApp');
   };
 
-  const sendWish = async (event: FormEvent<HTMLFormElement>) => {
+  const sendWish = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const message = `${wishName || 'Un invitado'}: ${wishMessage || 'Que Dios bendiga siempre a Valentina.'}`;
-    const whatsappMessage = `Un deseo para Valentina ♡\n${message}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`, '_blank', 'noopener,noreferrer');
-    setNotice('Tu deseo está listo en WhatsApp');
-    setWishOpen(false);
-    celebrate();
+    const message = `Un deseo para Valentina ♡\n${wishName || 'Un invitado'}: ${wishMessage || 'Que Dios te bendiga siempre.'}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    setNotice('Tu mensaje está listo en WhatsApp');
   };
 
   return (
-    <main className="invitation-shell">
-      <div className="ambient ambient-one" aria-hidden="true" />
-      <div className="ambient ambient-two" aria-hidden="true" />
-      <div className="sparkle-field" aria-hidden="true">
-        {sparkleSymbols.map((symbol, index) => (
-          <span key={`${symbol}-${index}`} style={{ '--n': index } as CSSProperties}>{symbol}</span>
+    <main className={`invite-page ${coverStage === 'open' ? 'cover-is-open' : ''}`}>
+      <div className="page-ambient ambient-left" aria-hidden="true" />
+      <div className="page-ambient ambient-right" aria-hidden="true" />
+      <div className="floating-sparkles" aria-hidden="true">
+        {Array.from({ length: 14 }).map((_, index) => (
+          <span
+            key={index}
+            style={{
+              '--x': `${2 + index * 7.2}%`,
+              '--y': `${8 + ((index * 17) % 78)}%`,
+              '--sparkle-delay': `${index * -0.55}s`,
+            } as CSSProperties}
+          >
+            {index % 3 === 0 ? '♡' : index % 2 === 0 ? '✦' : '·'}
+          </span>
         ))}
       </div>
 
-      {burstKey > 0 && (
-        <div key={burstKey} className="confetti-burst" aria-hidden="true">
-          {Array.from({ length: 22 }).map((_, index) => (
-            <i key={index} style={{ '--i': index } as CSSProperties} />
-          ))}
+      {coverStage !== 'open' && (
+        <div className={`cover-overlay ${coverStage === 'opening' ? 'cover-opening' : ''}`}>
+          <button
+            type="button"
+            className="digital-cover"
+            onClick={openCover}
+            onPointerMove={handleCoverTilt}
+            onPointerLeave={resetCoverTilt}
+            onAnimationEnd={(event) => {
+              if (event.target === event.currentTarget && coverStage === 'opening') setCoverStage('open');
+            }}
+            aria-label="Abrir la invitación de mi bautizo"
+          >
+            <span className="cover-corner corner-top-left" aria-hidden="true" />
+            <span className="cover-corner corner-top-right" aria-hidden="true" />
+            <span className="cover-corner corner-bottom-left" aria-hidden="true" />
+            <span className="cover-corner corner-bottom-right" aria-hidden="true" />
+            <span className="cover-light" aria-hidden="true" />
+
+            <span className="cover-image-frame">
+              <img src="/gatita-portada-cruz.png" alt="Gatita blanca completa junto a una cruz y una biblia" />
+            </span>
+
+            <span className="cover-title-panel">
+              <small>Una invitación muy especial</small>
+              <strong>Mi Bautizo</strong>
+              <em>Valentina</em>
+              <span className="tap-to-open">
+                <i aria-hidden="true">♡</i>
+                Toca para abrir
+              </span>
+            </span>
+          </button>
+          <p className="cover-instruction">Toca la tarjeta para descubrir la invitación</p>
         </div>
       )}
 
-      <section
-        className="invitation"
-        aria-label="Invitación al bautizo de Valentina"
-        onPointerMove={handleParallax}
-        onPointerLeave={resetParallax}
-        onTouchStart={(event) => {
-          touchStart.current = event.changedTouches[0].clientX;
-        }}
-        onTouchEnd={(event) => {
-          if (touchStart.current === null) return;
-          const distance = event.changedTouches[0].clientX - touchStart.current;
-          if (distance < -55) advance();
-          if (distance > 55) goTo(screen - 1);
-          touchStart.current = null;
-        }}
-      >
-        <header className="progress-bar">
-          <p>{screens[screen].label}</p>
-          <div className="dots" aria-label={`Pantalla ${screen + 1} de ${screens.length}`}>
-            {screens.map((item, index) => (
-              <button
-                key={item.label}
-                className={index === screen ? 'dot dot-active' : 'dot'}
-                onClick={() => goTo(index)}
-                aria-label={`Ir a ${item.label}`}
-                aria-current={index === screen ? 'step' : undefined}
+      {coverStage === 'open' && <article className="invitation-scroll">
+        <section className="hero-section" aria-labelledby="invitation-title">
+          <div className="cat-walkway">
+            <div className="footsteps" aria-hidden="true">
+              {Array.from({ length: 6 }).map((_, index) => <i key={index} />)}
+            </div>
+            <div className="cat-arrival">
+              <img
+                className="walking-kitty"
+                src="/gatita-lazo.png"
+                alt="Gatita blanca completa con moño rosa y una biblia"
               />
+            </div>
+          </div>
+
+          <div className="hero-copy">
+            <span className="eyebrow">Con mucha alegría</span>
+            <div className="gold-divider" aria-hidden="true"><span />✝<span /></div>
+            <p>Acompáñanos a celebrar mi</p>
+            <h1 id="invitation-title">Bautizo</h1>
+            <h2>Valentina</h2>
+            <p className="hero-message">
+              Un día bendecido, rodeada del amor de mi familia y de las personas que más quiero.
+            </p>
+            <button className="primary-button shine" onClick={() => detailsRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+              Ver invitación <span aria-hidden="true">↓</span>
+            </button>
+            <small>La gatita llega dando pasitos; después solo desliza hacia abajo</small>
+          </div>
+        </section>
+
+        <section ref={detailsRef} className="event-section reveal-section" id="celebracion">
+          <span className="eyebrow">Guarda la fecha</span>
+          <h2>La celebración</h2>
+          <p className="section-intro">Con la bendición de Dios y de nuestros padres</p>
+
+          <div className="date-row">
+            <div className="date-circle">
+              <span>NOV</span>
+              <strong>14</strong>
+            </div>
+            <div className="date-text">
+              <strong>Sábado</strong>
+              <span>2026 · 11:00 a. m.</span>
+            </div>
+          </div>
+
+          <div className="countdown" aria-label="Cuenta regresiva">
+            <div><strong>{countdown.days}</strong><span>Días</span></div>
+            <div><strong>{countdown.hours}</strong><span>Horas</span></div>
+            <div><strong>{countdown.minutes}</strong><span>Minutos</span></div>
+          </div>
+        </section>
+
+        <section className="places-section reveal-section" aria-labelledby="places-title">
+          <span className="eyebrow">Te esperamos</span>
+          <h2 id="places-title">Los lugares</h2>
+
+          <div className="place-list">
+            {places.map((place, index) => (
+              <article className="place-card" key={place.name} style={{ '--delay': `${index * 120}ms` } as CSSProperties}>
+                <span className="place-icon" aria-hidden="true">{place.icon}</span>
+                <div>
+                  <small>{place.label}</small>
+                  <h3>{place.name}</h3>
+                  <p>{place.address}</p>
+                  <a href={place.map} target="_blank" rel="noreferrer">Abrir mapa <span aria-hidden="true">↗</span></a>
+                </div>
+              </article>
             ))}
           </div>
-          <span>{screen + 1} / {screens.length}</span>
-        </header>
+        </section>
 
-        <div className="screen-window">
-          <article key={screen} className={`screen screen-${screen + 1} enter-${direction}`}>
-            {screen === 0 && (
-              <div className={`cover-layout ${opened ? 'cover-opened' : ''}`}>
-                <button
-                  type="button"
-                  className="portrait-stage"
-                  onClick={() => {
-                    if (!opened) setOpened(true);
-                    celebrate();
-                  }}
-                  aria-label="Abrir la invitación tocando la gatita"
-                >
-                  <div className="portrait-halo" aria-hidden="true" />
-                  <img
-                    className="kitty-portrait"
-                    src="/gatita-lazo.png"
-                    alt="Gatita blanca con moño rosa y una biblia"
-                  />
-                </button>
+        <section className="blessing-section reveal-section">
+          <span className="cross-mark" aria-hidden="true">✝</span>
+          <blockquote>
+            “Dejen que los niños vengan a mí, porque de ellos es el reino de los cielos.”
+            <cite>Mateo 19:14</cite>
+          </blockquote>
+        </section>
 
-                <div className="cover-copy">
-                  <span className="eyebrow">{opened ? 'Invitación abierta' : 'Una invitación muy especial'}</span>
-                  <div className="mini-ornament" aria-hidden="true"><span />✝<span /></div>
-                  <p className="join-us">Acompáñanos a celebrar mi</p>
-                  <h1>Bautizo</h1>
-                  <p className="name">Valentina</p>
-                  <p className="intro">
-                    {opened
-                      ? 'Con el corazón lleno de alegría queremos compartir contigo este día bendecido.'
-                      : 'Toca el botón y descubre todos los detalles de este día.'}
-                  </p>
-                  <button className="primary-button shimmer-button" onClick={advance}>
-                    <span>{opened ? 'Ver fecha' : 'Abrir invitación'}</span>
-                    <span aria-hidden="true">{opened ? '→' : '♡'}</span>
-                  </button>
-                  <small>También puedes deslizar hacia la izquierda</small>
-                </div>
-              </div>
-            )}
+        <section className="wish-section reveal-section" aria-labelledby="wish-title">
+          <span className="eyebrow">Un detalle especial</span>
+          <h2 id="wish-title">Deja un deseo para Valentina</h2>
+          <p>Escribe unas palabras bonitas y las prepararemos para enviarlas por WhatsApp.</p>
 
-            {screen === 1 && (
-              <div className="details-copy">
-                <div className="date-kitty-wrap">
-                  <img src="/gatita-lazo.png" alt="" aria-hidden="true" />
-                </div>
-                <span className="eyebrow">Guarda la fecha</span>
-                <span className="tiny-cross" aria-hidden="true">✝</span>
-                <p className="join-us">Con la bendición de Dios y de mis padres</p>
-                <h2>Valentina</h2>
-                <div className="date-lockup">
-                  <div><span>NOV</span><strong>14</strong></div>
-                  <p><b>Sábado</b><span>2026</span></p>
-                </div>
-                <p className="time">A las 11:00 de la mañana</p>
+          <form onSubmit={sendWish}>
+            <label>
+              Tu nombre
+              <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Escribe tu nombre" />
+            </label>
+            <label>
+              Tu mensaje
+              <textarea value={wishMessage} onChange={(event) => setWishMessage(event.target.value)} placeholder="Que Dios te bendiga siempre…" rows={3} />
+            </label>
+            <button className="primary-button whatsapp-button" type="submit">Enviar por WhatsApp</button>
+          </form>
 
-                <div className="countdown" aria-label="Cuenta regresiva para el evento">
-                  <div><strong>{countdown.days}</strong><span>Días</span></div>
-                  <div><strong>{countdown.hours}</strong><span>Horas</span></div>
-                  <div><strong>{countdown.minutes}</strong><span>Min.</span></div>
-                </div>
+          <button className="share-link" onClick={shareInvitation}>Compartir la invitación completa</button>
+          {notice && <p className="notice" role="status">{notice}</p>}
+        </section>
 
-                <button
-                  className={`blessing ${blessingOpen ? 'blessing-open' : ''}`}
-                  onClick={() => setBlessingOpen((value) => !value)}
-                  aria-expanded={blessingOpen}
-                >
-                  <span className="blessing-label">{blessingOpen ? 'Una bendición para ti' : 'Toca para revelar una bendición'}</span>
-                  <span className="blessing-verse">
-                    “Dejen que los niños vengan a mí, porque de ellos es el reino de los cielos.”
-                    <cite>Mateo 19:14</cite>
-                  </span>
-                </button>
-              </div>
-            )}
-
-            {screen === 2 && (
-              <div className="locations-copy">
-                <span className="eyebrow">Te esperamos</span>
-                <h2>Detalles del día</h2>
-                <p className="tap-hint">Toca cada lugar para ver la información</p>
-
-                <div className="place-list">
-                  {places.map((place, index) => (
-                    <div key={place.name} className={`place-card ${activePlace === index ? 'place-card-open' : ''}`}>
-                      <button onClick={() => setActivePlace(index)} aria-expanded={activePlace === index}>
-                        <span className="place-icon" aria-hidden="true">{place.icon}</span>
-                        <span className="place-summary">
-                          <small>{place.type}</small>
-                          <strong>{place.name}</strong>
-                        </span>
-                        <span className="place-chevron" aria-hidden="true">⌄</span>
-                      </button>
-                      <div className="place-extra">
-                        <p>{place.address}</p>
-                        <a href={place.map} target="_blank" rel="noreferrer">
-                          Abrir mapa <span aria-hidden="true">↗</span>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rsvp-card">
-                  <div className="rsvp-kitty" aria-hidden="true">
-                    <img src="/gatita-lazo.png" alt="" />
-                  </div>
-                  <span>Tu presencia es nuestro mejor regalo</span>
-                  <div className="action-row">
-                    <button className="primary-button" onClick={() => setWishOpen(true)}>Dejar un deseo</button>
-                    <button className="whatsapp-share" onClick={shareInvitation} aria-label="Compartir invitación por WhatsApp">WhatsApp</button>
-                  </div>
-                  {notice && <p role="status">{notice}</p>}
-                </div>
-              </div>
-            )}
-          </article>
-        </div>
-
-        <footer className="navigation">
-          <button className="nav-button" onClick={() => goTo(screen - 1)} disabled={screen === 0} aria-label="Pantalla anterior">←</button>
-          <p>{screen === 2 ? 'Gracias por acompañarnos' : opened ? 'Continúa descubriendo' : 'Toca para comenzar'}</p>
-          <button className="nav-button nav-button-next" onClick={advance} aria-label={screen === 2 ? 'Volver al inicio' : 'Continuar'}>
-            {screen === 2 ? '↻' : '→'}
-          </button>
+        <footer>
+          <span aria-hidden="true">♡</span>
+          <p>Gracias por acompañarnos en este día tan especial</p>
         </footer>
-      </section>
-
-      {wishOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setWishOpen(false)}>
-          <div className="wish-modal" role="dialog" aria-modal="true" aria-labelledby="wish-title" onMouseDown={(event) => event.stopPropagation()}>
-            <button className="modal-close" onClick={() => setWishOpen(false)} aria-label="Cerrar">×</button>
-            <span aria-hidden="true" className="modal-heart">♡</span>
-            <h2 id="wish-title">Un deseo para Valentina</h2>
-            <p>Escribe unas palabras bonitas y las prepararemos para enviarlas por WhatsApp.</p>
-            <form onSubmit={sendWish}>
-              <label>
-                Tu nombre
-                <input value={wishName} onChange={(event) => setWishName(event.target.value)} placeholder="Escribe tu nombre" />
-              </label>
-              <label>
-                Tu mensaje
-                <textarea value={wishMessage} onChange={(event) => setWishMessage(event.target.value)} placeholder="Que Dios te bendiga siempre…" rows={3} />
-              </label>
-              <button className="primary-button whatsapp-button" type="submit">Enviar por WhatsApp</button>
-            </form>
-          </div>
-        </div>
-      )}
+      </article>}
     </main>
   );
 }
